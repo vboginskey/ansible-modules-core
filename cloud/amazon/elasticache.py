@@ -480,7 +480,6 @@ class ElastiCacheManager(object):
 
 def main():
     argument_spec = ec2_argument_spec()
-    default = object()
     argument_spec.update(dict(
             state={'required': True, 'choices': ['present', 'absent', 'rebooted']},
             name={'required': True},
@@ -492,7 +491,7 @@ def main():
             cache_parameter_group={'required': False, 'default': None, 'aliases': ['parameter_group']},
             cache_port={'required': False, 'type': 'int'},
             cache_subnet_group={'required': False, 'default': None},
-            cache_security_groups={'required': False, 'default': [default],
+            cache_security_groups={'required': False, 'default': [],
                                 'type': 'list'},
             security_group_ids={'required': False, 'default': [],
                                 'type': 'list'},
@@ -526,12 +525,10 @@ def main():
     hard_modify = module.params['hard_modify']
     cache_parameter_group = module.params['cache_parameter_group']
 
-    if cache_subnet_group and cache_security_groups == [default]:
-        cache_security_groups = []
     if cache_subnet_group and cache_security_groups:
         module.fail_json(msg="Can't specify both cache_subnet_group and cache_security_groups")
 
-    if cache_security_groups == [default]:
+    if cache_subnet_group is None and cache_security_groups == []:
         cache_security_groups = ['default']
 
     if state == 'present' and not num_nodes:
